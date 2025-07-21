@@ -1,3 +1,6 @@
+"""
+main.py - Flask 應用程式進入點，負責註冊所有 Blueprint 與初始化資料庫。
+"""
 import os
 import sys
 # DON'T CHANGE THIS !!!
@@ -19,8 +22,10 @@ from src.routes.admin import admin_bp
 from src.routes.auth import auth_bp
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
-app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', '請改成安全亂數')
+app.config['SESSION_COOKIE_SECURE'] = True
 
+# 設定 Flask 應用程式與安全性
 # 啟用CORS支援
 CORS(app)
 

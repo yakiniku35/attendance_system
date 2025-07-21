@@ -5,6 +5,7 @@ from datetime import datetime
 db = SQLAlchemy()
 
 class User(db.Model):
+    """使用者資料表，包含帳號、密碼、角色、學號等欄位"""
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -18,16 +19,19 @@ class User(db.Model):
     forms_created = db.relationship('AttendanceForm', backref='creator', lazy=True)
     attendance_records = db.relationship('AttendanceRecord', backref='student', lazy=True)
 
-    def set_password(self, password):
+    def set_password(self, password: str) -> None:
+        """設定密碼雜湊"""
         self.password_hash = generate_password_hash(password)
     
-    def check_password(self, password):
+    def check_password(self, password: str) -> bool:
+        """檢查密碼是否正確"""
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
         return f'<User {self.username}>'
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """回傳使用者資料的 dict 版本（不含密碼）"""
         return {
             'id': self.id,
             'username': self.username,

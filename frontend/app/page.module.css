@@ -91,16 +91,44 @@ a.secondary {
   min-width: 158px;
 }
 
+.features {
+  margin: 32px 0 24px 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 18px;
+  color: var(--foreground);
+  align-items: flex-start;
+}
+
+@media (max-width: 600px) {
+  .features {
+    font-size: 16px;
+    align-items: center;
+  }
+}
+
 .footer {
   grid-row-start: 3;
   display: flex;
   gap: 24px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 40px;
+  font-size: 15px;
+  color: var(--foreground);
 }
 
 .footer a {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  color: var(--foreground);
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.footer a:hover {
+  color: #0070f3;
 }
 
 .footer img {

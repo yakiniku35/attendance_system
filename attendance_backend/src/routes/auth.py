@@ -5,10 +5,12 @@ from src.utils.email_service import email_service
 from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 import re
+from flask import Response
+from typing import Any
 
 auth_bp = Blueprint('auth', __name__)
 
-def validate_email(email):
+def validate_email(email: str) -> bool:
     """驗證郵件格式"""
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(pattern, email) is not None
@@ -20,8 +22,8 @@ def validate_password(password):
     return True, ""
 
 @auth_bp.route('/auth/register', methods=['POST'])
-def register():
-    """用戶註冊"""
+def register() -> tuple:
+    """用戶註冊 API，回傳 JSON 與狀態碼"""
     data = request.get_json()
     
     # 驗證必要欄位
@@ -104,28 +106,32 @@ def register():
         return jsonify({'error': '註冊失敗，請稍後再試'}), 500
 
 @auth_bp.route('/auth/login', methods=['POST'])
-def login():
-    """用戶登入"""
+def login() -> Response:
+    """用戶登入 API，回傳 JSON 與狀態碼"""
     data = request.get_json()
-    
-    if not data.get('username') or not data.get('password'):
-        return jsonify({'error': '請輸入用戶名和密碼'}), 400
-    
+    if not data or not data.get('username') or not data.get('password'):
+        response = jsonify({'error': '請輸入用戶名和密碼'})
+        response.status_code = 400
+        return response
+
     username = data['username'].strip()
     password = data['password']
-    
-    # 查找用戶（支援用戶名或郵件登入）
+
     user = User.query.filter(
         db.or_(User.username == username, User.email == username)
     ).first()
-    
     if not user:
-        return jsonify({'error': '用戶不存在'}), 401
-    
+        response = jsonify({'error': '用戶不存在'})
+        response.status_code = 401
+        return response
     if not user.is_active:
-        return jsonify({'error': '帳號已被停用，請聯繫管理員'}), 401
-    
+        response = jsonify({'error': '帳號已被停用，請聯繫管理員'})
+        response.status_code = 401
+        return response
     if not user.check_password(password):
+        response = jsonify({'error': '密碼錯誤'})
+        response.status_code = 401
+        return response
         return jsonify({'error': '密碼錯誤'}), 401
     
     # 設置session
@@ -228,8 +234,8 @@ def verify_reset_otp():
     })
 
 @auth_bp.route('/auth/reset-password', methods=['POST'])
-def reset_password():
-    """重置密碼"""
+def reset_password() -> tuple:
+    """重置密碼 API，回傳 JSON 與狀態碼"""
     data = request.get_json()
     
     required_fields = ['reset_token', 'otp_code', 'new_password']
@@ -268,16 +274,16 @@ def reset_password():
         
         db.session.commit()
         
-        return jsonify({'message': '密碼重置成功，請使用新密碼登入'})
-    
+        return jsonify({'message': '密碼重置成功，請使用新密碼登入'}), 200
+
     except Exception as e:
         db.session.rollback()
         print(f"密碼重置失敗: {str(e)}")
         return jsonify({'error': '密碼重置失敗，請稍後再試'}), 500
 
 @auth_bp.route('/auth/change-password', methods=['POST'])
-def change_password():
-    """修改密碼（已登入用戶）"""
+def change_password() -> tuple:
+    """修改密碼 API，回傳 JSON 與狀態碼"""
     if 'user_id' not in session:
         return jsonify({'error': '需要登入'}), 401
     
@@ -305,8 +311,8 @@ def change_password():
         user.set_password(new_password)
         db.session.commit()
         
-        return jsonify({'message': '密碼修改成功'})
-    
+        return jsonify({'message': '密碼修改成功'}), 200
+
     except Exception as e:
         db.session.rollback()
         print(f"密碼修改失敗: {str(e)}")
@@ -346,5 +352,4 @@ def verify_email():
     except Exception as e:
         db.session.rollback()
         print(f"郵件驗證失敗: {str(e)}")
-        return jsonify({'error': '郵件驗證失敗，請稍後再試'}), 500
-
+        return jsonify({'error': 'Email verification failed, please try again later'}), 500
