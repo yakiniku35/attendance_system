@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學生出缺席管理系統</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>出缺席管理系統</span>
+            </div>
+            <div class="nav-menu" id="nav-menu">
+                <div class="nav-user" id="nav-user" style="display: none;">
+                    <span class="user-name" id="user-name"></span>
+                    <span class="user-role" id="user-role"></span>
+                    <button class="btn btn-outline" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> 登出
+                    </button>
+                </div>
+            </div>
+            <div class="theme-toggle">
+                <button id="theme-toggle" class="theme-btn">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要內容區域 -->
+    <main class="main-content">
+        <!-- 登入頁面 -->
+        <div class="page" id="login-page">
+            <div class="login-container">
+                <div class="login-card">
+                    <div class="login-header">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h1>學生出缺席管理系統</h1>
+                        <p>請登入您的帳號</p>
+                    </div>
+                    <form class="login-form" id="login-form">
+                        <div class="form-group">
+                            <label for="username">用戶名</label>
+                            <div class="input-group">
+                                <i class="fas fa-user"></i>
+                                <input type="text" id="username" name="username" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">密碼</label>
+                            <div class="input-group">
+                                <i class="fas fa-lock"></i>
+                                <input type="password" id="password" name="password" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <i class="fas fa-sign-in-alt"></i> 登入
+                        </button>
+                    </form>
+                    <div class="login-footer">
+                        <p>還沒有帳號？ <a href="#" onclick="showRegisterPage()">立即註冊</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 註冊頁面 -->
+        <div class="page" id="register-page" style="display: none;">
+            <div class="login-container">
+                <div class="login-card">
+                    <div class="login-header">
+                        <i class="fas fa-user-plus"></i>
+                        <h1>註冊新帳號</h1>
+                        <p>請填寫您的資料</p>
+                    </div>
+                    <form class="login-form" id="register-form">
+                        <div class="form-group">
+                            <label for="reg-username">用戶名</label>
+                            <div class="input-group">
+                                <i class="fas fa-user"></i>
+                                <input type="text" id="reg-username" name="username" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-email">電子郵件</label>
+                            <div class="input-group">
+                                <i class="fas fa-envelope"></i>
+                                <input type="email" id="reg-email" name="email" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-full-name">姓名</label>
+                            <div class="input-group">
+                                <i class="fas fa-id-card"></i>
+                                <input type="text" id="reg-full-name" name="full_name" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-role">角色</label>
+                            <div class="input-group">
+                                <i class="fas fa-users"></i>
+                                <select id="reg-role" name="role" required onchange="toggleStudentId()">
+                                    <option value="">請選擇角色</option>
+                                    <option value="student">學生</option>
+                                    <option value="teacher">老師</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" id="student-id-group" style="display: none;">
+                            <label for="reg-student-id">學號</label>
+                            <div class="input-group">
+                                <i class="fas fa-id-badge"></i>
+                                <input type="text" id="reg-student-id" name="student_id">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-password">密碼</label>
+                            <div class="input-group">
+                                <i class="fas fa-lock"></i>
+                                <input type="password" id="reg-password" name="password" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <i class="fas fa-user-plus"></i> 註冊
+                        </button>
+                    </form>
+                    <div class="login-footer">
+                        <p>已有帳號？ <a href="#" onclick="showLoginPage()">立即登入</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 儀表板頁面 -->
+        <div class="page" id="dashboard-page" style="display: none;">
+            <div class="dashboard-container">
+                <div class="dashboard-header">
+                    <h1>儀表板</h1>
+                    <p>歡迎回來，<span id="dashboard-user-name"></span></p>
+                </div>
+                
+                <!-- 學生儀表板 -->
+                <div class="dashboard-content" id="student-dashboard" style="display: none;">
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-plus-circle"></i> 加入課程</h3>
+                            </div>
+                            <div class="card-content">
+                                <p>輸入課程代碼加入新課程</p>
+                                <div class="join-course-form">
+                                    <input type="text" id="join-code" placeholder="輸入課程代碼" maxlength="6">
+                                    <button class="btn btn-primary" onclick="joinCourse()">
+                                        <i class="fas fa-plus"></i> 加入
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-book"></i> 我的課程</h3>
+                            </div>
+                            <div class="card-content">
+                                <div id="student-courses" class="course-list">
+                                    <!-- 課程列表將在這裡動態載入 -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-clipboard-list"></i> 待填寫表單</h3>
+                            </div>
+                            <div class="card-content">
+                                <div id="pending-forms" class="form-list">
+                                    <!-- 待填寫表單將在這裡動態載入 -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-chart-pie"></i> 出席統計</h3>
+                            </div>
+                            <div class="card-content">
+                                <canvas id="student-attendance-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 老師儀表板 -->
+                <div class="dashboard-content" id="teacher-dashboard" style="display: none;">
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-plus-circle"></i> 建立課程</h3>
+                            </div>
+                            <div class="card-content">
+                                <button class="btn btn-primary btn-full" onclick="showCreateCourseModal()">
+                                    <i class="fas fa-plus"></i> 新增課程
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-book"></i> 我的課程</h3>
+                            </div>
+                            <div class="card-content">
+                                <div id="teacher-courses" class="course-list">
+                                    <!-- 課程列表將在這裡動態載入 -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-clipboard-list"></i> 建立表單</h3>
+                            </div>
+                            <div class="card-content">
+                                <button class="btn btn-primary btn-full" onclick="showCreateFormModal()">
+                                    <i class="fas fa-plus"></i> 新增出缺席表單
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-chart-bar"></i> 課程統計</h3>
+                            </div>
+                            <div class="card-content">
+                                <canvas id="teacher-attendance-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 管理員儀表板 -->
+                <div class="dashboard-content" id="admin-dashboard" style="display: none;">
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-users"></i> 用戶管理</h3>
+                            </div>
+                            <div class="card-content">
+                                <button class="btn btn-primary btn-full" onclick="showUserManagement()">
+                                    <i class="fas fa-cog"></i> 管理用戶
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-chart-line"></i> 系統統計</h3>
+                            </div>
+                            <div class="card-content">
+                                <canvas id="admin-overview-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 模態框 -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">標題</h3>
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- 模態框內容將在這裡動態載入 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知系統 -->
+    <div class="notification-container" id="notification-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
