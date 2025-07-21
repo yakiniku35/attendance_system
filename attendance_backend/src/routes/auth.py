@@ -10,6 +10,8 @@ from typing import Any
 
 auth_bp = Blueprint('auth', __name__)
 
+'use client';
+
 def validate_email(email: str) -> bool:
     """驗證郵件格式"""
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
